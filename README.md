@@ -1,2 +1,3 @@
 # azure.monitor
-Sample ARM templates for Azure Monitor alerts
+
+Sample templates for various Azure Monitor components and services
