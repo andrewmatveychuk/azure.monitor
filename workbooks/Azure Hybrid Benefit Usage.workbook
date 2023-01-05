@@ -1,0 +1,592 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [],
+        "parameters": [
+          {
+            "id": "f5d91eb1-402f-4460-b5f3-bdcee747f8c1",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscription",
+            "type": 6,
+            "isRequired": true,
+            "isGlobal": true,
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "includeAll": true,
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "value": ""
+          },
+          {
+            "id": "29ec0d20-dd19-40d4-b251-cd12424df366",
+            "version": "KqlParameterItem/1.0",
+            "name": "DisplayDetails",
+            "label": "",
+            "type": 2,
+            "isRequired": true,
+            "isGlobal": true,
+            "isHiddenWhenLocked": true,
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "jsonData": "[\r\n    { \"value\":\"false\", \"label\":\"False\" },\r\n    { \"value\":\"true\", \"label\":\"True\" }\r\n]",
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "value": "false"
+          },
+          {
+            "id": "ed577711-4e52-4cf7-9df5-8748f702130a",
+            "version": "KqlParameterItem/1.0",
+            "name": "Location",
+            "label": "Location (for Azure VM SKUs)",
+            "type": 8,
+            "isRequired": true,
+            "isGlobal": true,
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "includeAll": true,
+              "showDefault": false
+            },
+            "value": ""
+          }
+        ],
+        "style": "above",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "Parameters"
+    },
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          {
+            "id": "5861154a-b14e-4825-875d-8a3d1bef0994",
+            "cellValue": "tab",
+            "linkTarget": "parameter",
+            "linkLabel": "Windows Server VMs",
+            "subTarget": "WindowsServer",
+            "style": "link"
+          },
+          {
+            "id": "99e49e08-9a6b-42d7-ad8e-45ddf22b2e3f",
+            "cellValue": "tab",
+            "linkTarget": "parameter",
+            "linkLabel": "SQL Server VMs",
+            "subTarget": "SQLServerVM",
+            "style": "link"
+          },
+          {
+            "id": "dd192dbf-e73a-4a8d-af3f-06d762f11a01",
+            "cellValue": "tab",
+            "linkTarget": "parameter",
+            "linkLabel": "Windows Client VMs",
+            "subTarget": "WindowsClient",
+            "style": "link"
+          }
+        ]
+      },
+      "name": "Navigation"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.compute/virtualmachines'\r\n    and tostring(properties.storageProfile.imageReference.publisher) =~ 'MicrosoftWindowsServer'\r\n    and tostring(properties.['licenseType']) == 'Windows_Server'\r\n| summarize Count=count(type) by VMSize = tostring(properties.hardwareProfile.vmSize)",
+              "size": 0,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscription}"
+              ],
+              "tileSettings": {
+                "showBorder": false,
+                "titleContent": {
+                  "columnMatch": "VMSize",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "Count",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  },
+                  "numberFormat": {
+                    "unit": 17,
+                    "options": {
+                      "maximumSignificantDigits": 3,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              }
+            },
+            "conditionalVisibility": {
+              "parameterName": "DisplayDetails",
+              "comparison": "isEqualTo",
+              "value": "true"
+            },
+            "name": "Azure VMs by size"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "{\"version\":\"ARMEndpoint/1.0\",\"data\":null,\"headers\":[],\"method\":\"GET\",\"path\":\"/subscriptions/{Subscription:id}/providers/Microsoft.Compute/skus?api-version=2021-07-01&$filter=location eq '{Location}'\",\"urlParams\":[],\"batchDisabled\":true,\"transformers\":[{\"type\":\"jsonpath\",\"settings\":{\"tablePath\":\"$.value[?(@.resourceType==\\\"virtualMachines\\\")]\",\"columns\":[{\"path\":\"$.name\",\"columnid\":\"SKU_Name\",\"columnType\":\"string\"},{\"path\":\"$.capabilities[?(@.name==\\\"vCPUs\\\")].value\",\"columnid\":\"vCPUs\",\"columnType\":\"long\"}]}}]}",
+              "size": 0,
+              "queryType": 12,
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "resourceType",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "locations",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "locationInfo",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "restrictions",
+                    "formatter": 5
+                  }
+                ]
+              }
+            },
+            "conditionalVisibility": {
+              "parameterName": "DisplayDetails",
+              "comparison": "isEqualTo",
+              "value": "true"
+            },
+            "name": "Azure VM SKUs"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"3dffc95b-ff97-44ff-8571-d179563d9046\",\"mergeType\":\"leftouter\",\"leftTable\":\"Azure VMs by size\",\"rightTable\":\"Azure VM SKUs\",\"leftColumn\":\"VMSize\",\"rightColumn\":\"SKU_Name\"}],\"projectRename\":[{\"originalName\":\"[Azure VMs by size].VMSize\",\"mergedName\":\"VM Size\",\"fromId\":\"3dffc95b-ff97-44ff-8571-d179563d9046\"},{\"originalName\":\"[Azure VMs by size].Count\",\"mergedName\":\"VM Count\",\"fromId\":\"3dffc95b-ff97-44ff-8571-d179563d9046\"},{\"originalName\":\"[Azure VM SKUs].vCPUs\",\"mergedName\":\"vCPUs for Size\",\"fromId\":\"3dffc95b-ff97-44ff-8571-d179563d9046\"},{\"originalName\":\"[Added column]\",\"mergedName\":\"Core licenses consumed per VM\",\"fromId\":null,\"isNewItem\":true,\"newItemData\":[{\"criteriaContext\":{\"leftOperand\":\"vCPUs for Size\",\"operator\":\"<=\",\"rightValType\":\"static\",\"rightVal\":\"8\",\"resultValType\":\"static\",\"resultVal\":\"8\"}},{\"criteriaContext\":{\"operator\":\"Default\",\"rightValType\":\"column\",\"resultValType\":\"expression\",\"resultVal\":\"([\\\"vCPUs for Size\\\"] + 7) & ~7\"}}]},{\"originalName\":\"[Added column]\",\"mergedName\":\"Total vCPUs\",\"fromId\":null,\"isNewItem\":true,\"newItemData\":[{\"criteriaContext\":{\"operator\":\"Default\",\"rightValType\":\"column\",\"resultValType\":\"expression\",\"resultVal\":\"[\\\"VM Count\\\"]*[\\\"vCPUs for Size\\\"]\"}}]},{\"originalName\":\"[Added column]\",\"mergedName\":\"Total core licenses consumed per VM size\",\"fromId\":null,\"isNewItem\":true,\"newItemData\":[{\"criteriaContext\":{\"operator\":\"Default\",\"rightValType\":\"column\",\"resultValType\":\"expression\",\"resultVal\":\"[\\\"VM Count\\\"]*[\\\"Core licenses consumed per VM\\\"]\"}}]},{\"originalName\":\"[Added column]\",\"mergedName\":\"Optimal license usage check\",\"fromId\":null,\"isNewItem\":true,\"newItemData\":[{\"criteriaContext\":{\"leftOperand\":\"vCPUs for Size\",\"operator\":\"==\",\"rightValType\":\"column\",\"rightVal\":\"Core licenses consumed per VM\",\"resultValType\":\"static\",\"resultVal\":\"success\"}},{\"criteriaContext\":{\"operator\":\"Default\",\"rightValType\":\"column\",\"resultValType\":\"static\",\"resultVal\":\"failed\"}}]},{\"originalName\":\"[Azure VM SKUs].SKU_Name\"}]}",
+              "size": 2,
+              "title": "Windows Server VM license benefit usage details",
+              "showExportToExcel": true,
+              "queryType": 7,
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "Optimal license usage",
+                    "formatter": 11
+                  }
+                ],
+                "sortBy": [
+                  {
+                    "itemKey": "vCPUs for Size",
+                    "sortOrder": 1
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "vCPUs for Size",
+                  "sortOrder": 1
+                }
+              ],
+              "tileSettings": {
+                "showBorder": false,
+                "titleContent": {
+                  "columnMatch": "VM Size",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "VM Count",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  },
+                  "numberFormat": {
+                    "unit": 17,
+                    "options": {
+                      "maximumSignificantDigits": 3,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              },
+              "graphSettings": {
+                "type": 0,
+                "topContent": {
+                  "columnMatch": "VM Size",
+                  "formatter": 1
+                },
+                "centerContent": {
+                  "columnMatch": "VM Count",
+                  "formatter": 1,
+                  "numberFormat": {
+                    "unit": 17,
+                    "options": {
+                      "maximumSignificantDigits": 3,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              }
+            },
+            "name": "Core license consumption details"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"4d1ecf1b-0b46-4c80-807f-28573f8ee077\",\"mergeType\":\"table\",\"leftTable\":\"Core license consumption details\"}],\"projectRename\":[{\"originalName\":\"[Core license consumption details].VM Size\",\"mergedName\":\"VM Size\",\"fromId\":\"4d1ecf1b-0b46-4c80-807f-28573f8ee077\"},{\"originalName\":\"[Core license consumption details].Total vCPUs\",\"mergedName\":\"Total vCPUs\",\"fromId\":\"4d1ecf1b-0b46-4c80-807f-28573f8ee077\"},{\"originalName\":\"[Core license consumption details].Total core licenses consumed per VM size\",\"mergedName\":\"Total core licenses consumed per VM size\",\"fromId\":\"4d1ecf1b-0b46-4c80-807f-28573f8ee077\"},{\"originalName\":\"[query - 2].Optimal license usage check\"},{\"originalName\":\"[Core license consumption details].VM Count\"},{\"originalName\":\"[Core license consumption details].vCPUs for Size\"},{\"originalName\":\"[Core license consumption details].Core licenses consumed per VM\"},{\"originalName\":\"[Core license consumption details].Optimal license usage check\"}]}",
+              "size": 0,
+              "title": "Total core licenses consumed",
+              "queryType": 7,
+              "visualization": "piechart",
+              "tileSettings": {
+                "showBorder": false
+              },
+              "graphSettings": {
+                "type": 0
+              },
+              "chartSettings": {
+                "yAxis": [
+                  "Total core licenses consumed per VM size"
+                ],
+                "ySettings": {
+                  "numberFormatSettings": {
+                    "unit": 17,
+                    "options": {
+                      "style": "decimal",
+                      "useGrouping": true
+                    }
+                  }
+                }
+              }
+            },
+            "customWidth": "50",
+            "name": "Total core license consumed",
+            "styleSettings": {
+              "maxWidth": "50%"
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"7a19938f-5b61-4e7b-a012-01f65d43a091\",\"mergeType\":\"table\",\"leftTable\":\"Core license consumption details\"}],\"projectRename\":[{\"originalName\":\"[Core license consumption details].VM Size\",\"mergedName\":\"VM Size\",\"fromId\":\"7a19938f-5b61-4e7b-a012-01f65d43a091\"},{\"originalName\":\"[Core license consumption details].Total vCPUs\",\"mergedName\":\"Total vCPUs\",\"fromId\":\"7a19938f-5b61-4e7b-a012-01f65d43a091\"},{\"originalName\":\"[Core license consumption details].Total core licenses consumed per VM size\",\"mergedName\":\"Total core licenses consumed per VM size\",\"fromId\":\"7a19938f-5b61-4e7b-a012-01f65d43a091\"},{\"originalName\":\"[Core license consumption details].VM Count\"},{\"originalName\":\"[Core license consumption details].vCPUs for Size\"},{\"originalName\":\"[Core license consumption details].Core licenses consumed per VM\"},{\"originalName\":\"[Core license consumption details].Optimal license usage check\"}]}",
+              "size": 0,
+              "title": "Total vCPUs",
+              "queryType": 7,
+              "visualization": "piechart",
+              "chartSettings": {
+                "ySettings": {
+                  "numberFormatSettings": {
+                    "unit": 17,
+                    "options": {
+                      "style": "decimal",
+                      "useGrouping": true
+                    }
+                  }
+                }
+              }
+            },
+            "customWidth": "50",
+            "showPin": false,
+            "name": "Total vCPUs",
+            "styleSettings": {
+              "maxWidth": "50%"
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"3dffc95b-ff97-44ff-8571-d179563d908a\",\"mergeType\":\"table\",\"leftTable\":\"query - 2\"}],\"projectRename\":[{\"originalName\":\"[query - 2].VM Size\",\"mergedName\":\"VM Size\",\"fromId\":\"3dffc95b-ff97-44ff-8571-d179563d908a\"},{\"originalName\":\"[query - 2].VM Count\",\"mergedName\":\"VM Count\",\"fromId\":\"3dffc95b-ff97-44ff-8571-d179563d908a\"},{\"originalName\":\"[query - 2].vCPUs for Size\",\"mergedName\":\"vCPUs for Size\",\"fromId\":\"3dffc95b-ff97-44ff-8571-d179563d908a\"},{\"originalName\":\"[query - 2].Total vCPUs\",\"mergedName\":\"Total vCPUs\",\"fromId\":\"3dffc95b-ff97-44ff-8571-d179563d908a\"},{\"originalName\":\"[query - 2].Core licenses consumed\",\"mergedName\":\"Core licenses consumed\",\"fromId\":\"unknown\"},{\"originalName\":\"[query - 2].Core licenses consumed per VM\",\"mergedName\":\"Core licenses consumed per VM\",\"fromId\":\"unknown\"},{\"originalName\":\"[query - 2].Total core licenses consumed per VM size\",\"mergedName\":\"Total core licenses consumed per VM size\",\"fromId\":\"unknown\"},{\"originalName\":\"[query - 2].Optimal license usage\",\"mergedName\":\"Optimal license usage\",\"fromId\":\"unknown\"},{\"originalName\":\"[query - 2].Optimal license usage check\",\"mergedName\":\"Optimal license usage check\",\"fromId\":\"unknown\"}]}",
+              "size": 0,
+              "title": "Total vCPU count",
+              "queryType": 7,
+              "visualization": "barchart",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "VM Count",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "vCPUs for Size",
+                    "formatter": 5
+                  }
+                ],
+                "sortBy": [
+                  {
+                    "itemKey": "VM Size",
+                    "sortOrder": 1
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "VM Size",
+                  "sortOrder": 1
+                }
+              ],
+              "tileSettings": {
+                "showBorder": false,
+                "titleContent": {
+                  "columnMatch": "VM Size",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "VM Count",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  },
+                  "numberFormat": {
+                    "unit": 17,
+                    "options": {
+                      "maximumSignificantDigits": 3,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              },
+              "chartSettings": {
+                "yAxis": [
+                  "Total vCPUs"
+                ],
+                "ySettings": {
+                  "numberFormatSettings": {
+                    "unit": 17,
+                    "options": {
+                      "style": "decimal",
+                      "useGrouping": true
+                    }
+                  }
+                }
+              }
+            },
+            "conditionalVisibility": {
+              "parameterName": "DisplayDetails",
+              "comparison": "isEqualTo",
+              "value": "true"
+            },
+            "name": "query - 4"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "WindowsServer"
+      },
+      "name": "Windows Server VMs"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'Microsoft.SqlVirtualMachine/SqlVirtualMachines'\r\n    and tostring(properties.sqlImageSku) in~ ('Standard', 'Enterprise')\r\n    and tostring(properties.sqlServerLicenseType) =~ 'AHUB'\r\n| join kind=leftouter (\r\n    resources\r\n    | where type =~ 'Microsoft.Compute/virtualmachines'\r\n    | project name = tolower(name), VMSize = tostring(properties.hardwareProfile.vmSize)\r\n) on $left.name == $right.name\r\n| project Name = name1, VMSize, sqlImageSku = tostring(properties.sqlImageSku)",
+              "size": 0,
+              "title": "SQL Server VM details",
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscription}"
+              ],
+              "gridSettings": {
+                "sortBy": [
+                  {
+                    "itemKey": "sqlImageSku",
+                    "sortOrder": 2
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "sqlImageSku",
+                  "sortOrder": 2
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "DisplayDetails",
+              "comparison": "isEqualTo",
+              "value": "true"
+            },
+            "name": "SQL Server VM details"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "{\"version\":\"ARMEndpoint/1.0\",\"data\":null,\"headers\":[],\"method\":\"GET\",\"path\":\"/subscriptions/{Subscription:id}/providers/Microsoft.Compute/skus?api-version=2021-07-01&$filter=location eq '{Location}'\",\"urlParams\":[],\"batchDisabled\":true,\"transformers\":[{\"type\":\"jsonpath\",\"settings\":{\"tablePath\":\"$.value[?(@.resourceType==\\\"virtualMachines\\\")]\",\"columns\":[{\"path\":\"$.name\",\"columnid\":\"SKU_Name\",\"columnType\":\"string\"},{\"path\":\"$.capabilities[?(@.name==\\\"vCPUs\\\")].value\",\"columnid\":\"vCPUs\",\"columnType\":\"long\"}]}}]}",
+              "size": 0,
+              "title": "Azure VM SKUs",
+              "queryType": 12
+            },
+            "conditionalVisibility": {
+              "parameterName": "DisplayDetails",
+              "comparison": "isEqualTo",
+              "value": "true"
+            },
+            "name": "Azure VM SKUs"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"4d1ecf1b-0b46-4c80-807f-28573f8ee0ac\",\"mergeType\":\"innerunique\",\"leftTable\":\"SQL Server VM details\",\"rightTable\":\"Azure VM SKUs\",\"leftColumn\":\"VMSize\",\"rightColumn\":\"SKU_Name\"}],\"projectRename\":[{\"originalName\":\"[SQL Server VM details].Name\",\"mergedName\":\"Name\",\"fromId\":\"4d1ecf1b-0b46-4c80-807f-28573f8ee0ac\"},{\"originalName\":\"[SQL Server VM details].VMSize\",\"mergedName\":\"VMSize\",\"fromId\":\"4d1ecf1b-0b46-4c80-807f-28573f8ee0ac\"},{\"originalName\":\"[SQL Server VM details].sqlImageSku\",\"mergedName\":\"sqlImageSku\",\"fromId\":\"4d1ecf1b-0b46-4c80-807f-28573f8ee0ac\"},{\"originalName\":\"[Azure VM SKUs].vCPUs\",\"mergedName\":\"vCPUs\",\"fromId\":\"4d1ecf1b-0b46-4c80-807f-28573f8ee0ac\"},{\"originalName\":\"[Added column]\",\"mergedName\":\"SQL Server license cores consumed\",\"fromId\":null,\"isNewItem\":true,\"newItemData\":[{\"criteriaContext\":{\"leftOperand\":\"vCPUs\",\"operator\":\"<\",\"rightValType\":\"static\",\"rightVal\":\"4\",\"resultValType\":\"static\",\"resultVal\":\"4\"}},{\"criteriaContext\":{\"operator\":\"Default\",\"rightValType\":\"column\",\"resultValType\":\"expression\",\"resultVal\":\"([\\\"vCPUs\\\"] +3) & ~3\"}}]},{\"originalName\":\"[Added column]\",\"mergedName\":\"Optimal license usage check\",\"fromId\":null,\"isNewItem\":true,\"newItemData\":[{\"criteriaContext\":{\"leftOperand\":\"vCPUs\",\"operator\":\"==\",\"rightValType\":\"column\",\"rightVal\":\"SQL Server license cores consumed\",\"resultValType\":\"static\",\"resultVal\":\"success\"}},{\"criteriaContext\":{\"operator\":\"Default\",\"rightValType\":\"column\",\"resultValType\":\"static\",\"resultVal\":\"failed\"}}]},{\"originalName\":\"[Azure VM SKUs].SKU_Name\"}]}",
+              "size": 0,
+              "title": "SQL Server VM license benefit usage details",
+              "showExportToExcel": true,
+              "queryType": 7,
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "Optimal license usage check",
+                    "formatter": 11
+                  }
+                ],
+                "sortBy": [
+                  {
+                    "itemKey": "Optimal license usage check",
+                    "sortOrder": 1
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "Optimal license usage check",
+                  "sortOrder": 1
+                }
+              ]
+            },
+            "name": "query - 8"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"fae87118-bf55-458c-8f42-3401bcfba031\",\"mergeType\":\"table\",\"leftTable\":\"query - 8\"}],\"projectRename\":[{\"originalName\":\"[query - 8].sqlImageSku\",\"mergedName\":\"sqlImageSku\",\"fromId\":\"fae87118-bf55-458c-8f42-3401bcfba031\"},{\"originalName\":\"[query - 8].SQL Server license cores consumed\",\"mergedName\":\"SQL Server license cores consumed\",\"fromId\":\"fae87118-bf55-458c-8f42-3401bcfba031\"},{\"originalName\":\"[query - 8].Name\"},{\"originalName\":\"[query - 8].vCPUs\"},{\"originalName\":\"[query - 8].Optimal license usage check\"},{\"originalName\":\"[query - 8].VMSize\"}]}",
+              "size": 0,
+              "title": "Total SQL Server license cores consumed",
+              "queryType": 7,
+              "visualization": "categoricalbar",
+              "tileSettings": {
+                "showBorder": false,
+                "titleContent": {
+                  "columnMatch": "sqlImageSku",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "SQL Server license cores consumed",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  },
+                  "numberFormat": {
+                    "unit": 17,
+                    "options": {
+                      "maximumSignificantDigits": 3,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              },
+              "chartSettings": {
+                "xAxis": "sqlImageSku",
+                "yAxis": [
+                  "SQL Server license cores consumed"
+                ],
+                "showLegend": true,
+                "ySettings": {
+                  "numberFormatSettings": {
+                    "unit": 17,
+                    "options": {
+                      "style": "decimal",
+                      "useGrouping": true
+                    }
+                  }
+                }
+              }
+            },
+            "name": "query - 9"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "SQLServerVM"
+      },
+      "name": "SQL Server VMs"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'Microsoft.Compute/virtualmachines'\r\n    and tostring(properties.storageProfile.imageReference.publisher) =~ 'MicrosoftWindowsDesktop'\r\n    and tostring(properties.storageProfile.imageReference.offer) in~ ('windows-10', 'windows-11')\r\n    and tostring(properties.['licenseType']) == 'Windows_Client'\r\n| summarize WindowsClientCount = count()",
+              "size": 0,
+              "title": "Windows Clients utilizing the licensing benefit",
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscription}"
+              ],
+              "visualization": "card",
+              "gridSettings": {
+                "labelSettings": [
+                  {
+                    "columnId": "WindowsClientCount",
+                    "label": "Windows Client Count"
+                  }
+                ]
+              }
+            },
+            "name": "Windows Clients with Multitenant Hosting Rights"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "WindowsClient"
+      },
+      "name": "Windows Client VMs"
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "$schema": "https://raw.githubusercontent.com/microsoft/Application-Insights-Workbooks/master/schema/workbook.json"
+}
