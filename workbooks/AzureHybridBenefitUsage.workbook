@@ -89,6 +89,14 @@
             "style": "link"
           },
           {
+            "id": "8076a519-0761-4992-a0ff-1bdbc5288886",
+            "cellValue": "tab",
+            "linkTarget": "parameter",
+            "linkLabel": "SQL Databases and Managed Instances",
+            "subTarget": "SQLDatabase",
+            "style": "link"
+          },
+          {
             "id": "dd192dbf-e73a-4a8d-af3f-06d762f11a01",
             "cellValue": "tab",
             "linkTarget": "parameter",
@@ -585,6 +593,53 @@
         "value": "WindowsClient"
       },
       "name": "Windows Client VMs"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'Microsoft.Sql/servers/databases'\r\n| extend tier = tostring(sku.tier), capacity = tostring(sku.capacity), licenseType = tostring(properties.licenseType)\r\n| where tier in~ ('GeneralPurpose', 'Hyperscale', 'BusinessCritical') and kind !contains \"serverless\" and licenseType =~ 'BasePrice'\r\n| project DatabaseName = name, Tier = tier, vCores = capacity\r\n",
+              "size": 0,
+              "title": "SQL Database license benefit usage details",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscription}"
+              ]
+            },
+            "name": "query - 7"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'Microsoft.Sql/managedInstances'\r\n| extend tier = tostring(sku.tier), vCores = tostring(properties.vCores), licenseType = tostring(properties.licenseType)\r\n| where tier in~ ('GeneralPurpose', 'Hyperscale', 'BusinessCritical') and licenseType =~ 'BasePrice'\r\n| project ServerName = name, Tier = tier, vCores",
+              "size": 0,
+              "title": "SQL Managed Instance license benefit usage details",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscription}"
+              ]
+            },
+            "name": "query - 1"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "SQLDatabase"
+      },
+      "name": "SQL Databases"
     }
   ],
   "fallbackResourceIds": [
