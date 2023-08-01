@@ -1,0 +1,314 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "{Subscription}"
+        ],
+        "parameters": [
+          {
+            "id": "8c64f782-4dd7-4748-bcb1-c2cfb90af993",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscription",
+            "type": 6,
+            "isRequired": true,
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "includeAll": false,
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "value": ""
+          },
+          {
+            "id": "638c9ab8-ed58-4b5a-94c1-c0f8db1590da",
+            "version": "KqlParameterItem/1.0",
+            "name": "ResourceGroup",
+            "label": "Resource Group",
+            "type": 5,
+            "isRequired": true,
+            "query": "resourcecontainers\r\n| where type =~ 'microsoft.resources/subscriptions/resourcegroups'\r\n| project value = id, label = name",
+            "crossComponentResources": [
+              "{Subscription}"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources",
+            "value": ""
+          },
+          {
+            "id": "6d5a6e91-0c32-4a6c-aa3d-2832358b46f9",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Time Range",
+            "type": 4,
+            "isRequired": true,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 300000
+                },
+                {
+                  "durationMs": 900000
+                },
+                {
+                  "durationMs": 1800000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                }
+              ]
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "value": {
+              "durationMs": 172800000
+            }
+          },
+          {
+            "id": "a7ac246f-9722-49f6-9cbc-a91ffa43f6ec",
+            "version": "KqlParameterItem/1.0",
+            "name": "AlertCondition",
+            "label": "Alert Condition",
+            "type": 2,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "alertsmanagementresources\r\n| extend alertCondition = tostring(properties.essentials.monitorCondition)\r\n| summarize by alertCondition",
+            "crossComponentResources": [
+              "{Subscription}"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "selectAllValue": "",
+              "showDefault": false
+            },
+            "defaultValue": "value::all",
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources",
+            "value": [
+              "Fired"
+            ]
+          }
+        ],
+        "style": "pills",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
+      },
+      "name": "parameters - 1"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "alertsmanagementresources\r\n| where properties.essentials.targetResourceGroup =~ '{ResourceGroup:resourcegroup}'\r\n| where properties.essentials.startDateTime {TimeRange}\r\n| where properties.essentials.monitorCondition in ({AlertCondition})\r\n| extend severity = tostring(properties.essentials.severity),\r\n    alertCondition = tostring(properties.essentials.monitorCondition),\r\n    userResponse = tostring(properties.essentials.alertState),\r\n    targetResource = tostring(properties.essentials.targetResource),\r\n    fireTime = todatetime(properties.essentials.startDateTime)\r\n| order by fireTime desc \r\n| project name, severity, alertCondition, userResponse, targetResource, fireTime, properties",
+        "size": 0,
+        "title": "Alerts",
+        "exportFieldName": "fireTime",
+        "exportParameterName": "fireTime",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "severity",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "icons",
+                "thresholdsGrid": [
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Sev0",
+                    "representation": "Sev0",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Sev1",
+                    "representation": "Sev1",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Sev2",
+                    "representation": "Sev2",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Sev3",
+                    "representation": "Sev3",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Sev4",
+                    "representation": "Sev4",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "Default",
+                    "thresholdValue": null,
+                    "representation": "success",
+                    "text": "{0}{1}"
+                  }
+                ]
+              }
+            },
+            {
+              "columnMatch": "alertCondition",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "icons",
+                "thresholdsGrid": [
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Fired",
+                    "representation": "2",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Resolved",
+                    "representation": "success",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "Default",
+                    "thresholdValue": null,
+                    "representation": "success",
+                    "text": "{0}{1}"
+                  }
+                ]
+              }
+            },
+            {
+              "columnMatch": "fireTime",
+              "formatter": 6
+            }
+          ],
+          "labelSettings": [
+            {
+              "columnId": "name",
+              "label": "Name"
+            },
+            {
+              "columnId": "severity",
+              "label": "Severity"
+            },
+            {
+              "columnId": "alertCondition",
+              "label": "Alert condition"
+            },
+            {
+              "columnId": "userResponse",
+              "label": "User response"
+            },
+            {
+              "columnId": "targetResource",
+              "label": "Affected resource"
+            },
+            {
+              "columnId": "fireTime",
+              "label": "Fire time"
+            },
+            {
+              "columnId": "properties",
+              "label": "Properties"
+            }
+          ]
+        }
+      },
+      "name": "Alerts"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "resourcechanges\r\n| where resourceGroup =~ '{ResourceGroup:resourcegroup}'\r\n| extend changeTime = todatetime(properties.changeAttributes.timestamp), targetResourceId = tostring(properties.targetResourceId),\r\nchangeType = tostring(properties.changeType), correlationId = properties.changeAttributes.correlationId, \r\nchangedProperties = properties.changes, changeCount = properties.changeAttributes.changesCount\r\n| where changeTime < todatetime('{fireTime}')\r\n| order by changeTime desc\r\n| project changeTime, targetResourceId, changeType, correlationId, changeCount, changedProperties",
+        "size": 0,
+        "title": "Resource changes",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "changeTime",
+              "formatter": 6
+            },
+            {
+              "columnMatch": "correlationId",
+              "formatter": 1
+            }
+          ],
+          "labelSettings": [
+            {
+              "columnId": "changeTime",
+              "label": "Change time"
+            },
+            {
+              "columnId": "targetResourceId",
+              "label": "Affected resource"
+            },
+            {
+              "columnId": "changeType",
+              "label": "Change type"
+            },
+            {
+              "columnId": "correlationId",
+              "label": "Correlation Id"
+            },
+            {
+              "columnId": "changeCount",
+              "label": "Change count"
+            },
+            {
+              "columnId": "changedProperties",
+              "label": "Properties"
+            }
+          ]
+        }
+      },
+      "name": "Resource changes"
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
